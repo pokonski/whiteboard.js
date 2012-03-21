@@ -1,0 +1,6 @@
+development:
+  db:
+    uri: "mongodb://localhost/whiteboard_development"
+production:
+  db:
+    uri: "mongodb://localhost/whiteboard_production"
