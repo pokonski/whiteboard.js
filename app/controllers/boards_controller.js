@@ -26,11 +26,36 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/boards/:id', function(req, res) {
+  // Show
+  app.get('/board/:id', function(req, res) {
     res.render('boards/show',{
       title: req.board.name,
       board: req.board
     });
+  });
+
+  // New form
+  app.get('/boards/new', function(req, res){
+    res.render('boards/new', {
+      title: 'New board',
+      board: new Board({})
+    })
+  });
+
+  // Create board
+  app.post('/boards', function(req, res){
+      var board = new Board(req.body.board)
+
+      board.save(function(err){
+          if (err) {
+              utils.mongooseErrorHandler(err, req)
+              res.render('boards/new', {board: board});
+          }
+          else {
+              req.flash('notice', 'Created successfully')
+              res.redirect('/')
+          }
+      })
   });
 };
 

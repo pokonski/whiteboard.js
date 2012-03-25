@@ -1,4 +1,9 @@
 h1= title
+.row
+  a(href='/boards/new', class='pull-right btn btn-large btn-success')
+    i.icon-white.icon-plus
+    | &nbsp;
+    | Create board
 each board in boards
-  a(href = '/boards/'+board._id)= board.name
+  a(href = '/board/'+board._id)= board.name
   br

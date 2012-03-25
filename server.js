@@ -10,6 +10,7 @@ config_file = require('yaml-config');
 
 // Connect with database
 require('./db');
+require('./lib/flash.js');
 
 app = express.createServer();
 
@@ -22,7 +23,7 @@ app.configure(function() {
   app.use(express.session({
     secret: 'kljg985lgkmsrig8%^&5w5egm304gmrigq30jgq03qg@#$@#%#$%'
   }));
-
+  app.use(flash_messages);
   app.use(require('stylus').middleware({
     src: __dirname + '/public'
   }));
