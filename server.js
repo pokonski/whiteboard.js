@@ -3,6 +3,7 @@ var app, config, config_file, controller_files,
 
 fs = require('fs')
 express = require('express');
+require('./lib/utils');
 
 config_file = require('yaml-config');
 
@@ -10,7 +11,7 @@ config_file = require('yaml-config');
 
 // Connect with database
 require('./db');
-require('./lib/flash.js');
+require('./lib/flash');
 
 app = express.createServer();
 

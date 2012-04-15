@@ -4,7 +4,7 @@ else
   - path = '/board/'+board._id
 
 form.form-horizontal(method='post',action=path)
-  if typeof(board) === "object"
+  unless board.isNew
     input(name='_method', value='PUT', type='hidden')
   .control-group
     label.control-label(for='board_name') Name

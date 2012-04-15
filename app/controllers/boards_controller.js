@@ -2,11 +2,9 @@ var Board = conn.model('Board');
 
 module.exports = function(app) {
   app.get('/', function(req, res) {
-    //var board = new Board();
-    //board.name = "testowa"+Date();
-    //board.save();
     Board
       .find({})
+      .sort("updated_at", -1)
       .run(function(err, boards) {
         if (err) throw err
         res.render('boards/index', {
@@ -37,23 +35,22 @@ module.exports = function(app) {
   // New
   app.get('/boards/new', function(req, res){
     res.render('boards/new', {
-      title: 'New board',
       board: new Board({})
-    })
+    });
   });
 
   // Create
   app.post('/boards', function(req, res){
     var board = new Board(req.body.board)
-
+    board.updated_at = new Date();
     board.save(function(err){
       if (err) {
-        utils.mongooseErrorHandler(err, req)
+        mongooseErrorHandler(err, req);
         res.render('boards/new', {board: board});
       }
       else {
-        req.flash('notice', 'Created successfully')
-        res.redirect('/')
+        req.flash('notice', 'Created successfully');
+        res.redirect('/');
       }
     });
   });
@@ -80,6 +77,7 @@ module.exports = function(app) {
     var board = req.board
 
     board.name = req.body.board.name
+    board.updated_at = new Date();
 
     board.save(function(err, doc) {
       if (err) {

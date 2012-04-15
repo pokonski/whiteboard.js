@@ -7,11 +7,14 @@ h1= title
 table.table
   tr
     th Name
+    th Last modified
     th Options
   each board in boards
     tr
       td
         a(href = '/board/'+board._id)= board.name
+      td
+        = board.updated_at
       td
         a.btn.btn-danger(href = '/board/'+board._id, data-method="delete", data-confirm="Are you sure?") Delete
         &nbsp;
