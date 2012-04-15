@@ -1,0 +1,15 @@
+if board.isNew
+  - path = '/boards'
+else
+  - path = '/board/'+board._id
+
+form.form-horizontal(method='post',action=path)
+  if typeof(board) === "object"
+    input(name='_method', value='PUT', type='hidden')
+  .control-group
+    label.control-label(for='board_name') Name
+    .controls
+      input(type='text',class='input-xlarge',name='board[name]',value=board.name, id='board_name')
+
+  .form-actions
+    button.btn.btn-primary(type='submit') Save

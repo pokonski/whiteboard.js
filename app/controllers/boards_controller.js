@@ -34,7 +34,7 @@ module.exports = function(app) {
     });
   });
 
-  // New form
+  // New
   app.get('/boards/new', function(req, res){
     res.render('boards/new', {
       title: 'New board',
@@ -42,20 +42,58 @@ module.exports = function(app) {
     })
   });
 
-  // Create board
+  // Create
   app.post('/boards', function(req, res){
-      var board = new Board(req.body.board)
+    var board = new Board(req.body.board)
 
-      board.save(function(err){
-          if (err) {
-              utils.mongooseErrorHandler(err, req)
-              res.render('boards/new', {board: board});
-          }
-          else {
-              req.flash('notice', 'Created successfully')
-              res.redirect('/')
-          }
-      })
+    board.save(function(err){
+      if (err) {
+        utils.mongooseErrorHandler(err, req)
+        res.render('boards/new', {board: board});
+      }
+      else {
+        req.flash('notice', 'Created successfully')
+        res.redirect('/')
+      }
+    });
   });
+
+  // Delete
+  app.del('/board/:id', function(req, res){
+    var board = req.board
+    board.remove(function(err){
+      req.flash('notice', 'Deleted successfully');
+      res.redirect('/');
+    });
+  });
+
+  // Edit board
+  app.get('/board/:id/edit', function(req, res){
+    res.render('boards/edit', {
+      title: 'Edit '+req.board.name,
+      board: req.board
+    });
+  });
+
+  // Update board
+  app.put('/board/:id', function(req, res){
+    var board = req.board
+
+    board.name = req.body.board.name
+
+    board.save(function(err, doc) {
+      if (err) {
+        utils.mongooseErrorHandler(err, req)
+        res.render('boards/edit', {
+          title: 'Edit board'
+          , board: board
+        })
+      }
+      else {
+        req.flash('notice', 'Updated successfully')
+        res.redirect('/board/'+board._id)
+      }
+    })
+  })
 };
 

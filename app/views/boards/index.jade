@@ -4,6 +4,16 @@ h1= title
     i.icon-white.icon-plus
     | &nbsp;
     | Create board
-each board in boards
-  a(href = '/board/'+board._id)= board.name
-  br
+table.table
+  tr
+    th Name
+    th Options
+  each board in boards
+    tr
+      td
+        a(href = '/board/'+board._id)= board.name
+      td
+        a.btn.btn-danger(href = '/board/'+board._id, data-method="delete", data-confirm="Are you sure?") Delete
+        &nbsp;
+        a.btn.btn-info(href = '/board/'+board._id+'/edit') Edit
+

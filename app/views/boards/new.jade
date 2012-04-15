@@ -1,10 +1,3 @@
 h2= title
 
-form.form-horizontal(method='post',action='/boards')
-  .control-group
-    label.control-label(for='board_name') Name
-    .controls
-      input(type='text',class='input-xlarge',name='board[name]',value=board.name, id='board_name')
-
-  .form-actions
-    button.btn.btn-primary(type='submit') Create board
+!= partial('form')
