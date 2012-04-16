@@ -1,10 +1,24 @@
-var paper, move, startMove,stopMove;
+var paper, move, startMove,stopMove, channelName;
+
+// WebSockets
+channelName = '/updates/'+$('#whiteboard').data('id');
+
+var client = new Faye.Client('http://okonski.dyndns.org:3000/faye');
+
+var updates = client.subscribe(channelName, function(update) {
+  console.log(update);
+  var att = this.type == "rect" ? {x: update.x, y: update.y} : {cx: update.x, cy: update.y};
+  paper.getById(update.id).attr(att);
+});
+
 
 paper = Raphael("whiteboard", "100%", 600);
 
 move = function (dx, dy) {
   var att = this.type == "rect" ? {x: this.ox + dx, y: this.oy + dy} : {cx: this.ox + dx, cy: this.oy + dy};
   this.attr(att);
+  client.publish(channelName, {x: att.cx, y: att.cy, id: this.id});
+
 };
 
 startMove = function () {

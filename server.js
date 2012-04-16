@@ -1,5 +1,5 @@
 var app, config, config_file, controller_files,
-    controllers_path, exports, express, routes, fs;
+    controllers_path, exports, express, routes, fs, faye;
 
 fs = require('fs')
 express = require('express');
@@ -14,6 +14,12 @@ require('./db');
 require('./lib/flash');
 
 app = express.createServer();
+
+// WebSockets
+faye = require('faye');
+ws = new faye.NodeAdapter({mount: '/faye', timeout: 45});
+ws.attach(app);
+
 
 app.configure(function() {
   app.set('views', __dirname + '/app/views');
@@ -34,29 +40,29 @@ app.configure(function() {
 });
 
 app.configure('development', function() {
-return app.use(express.errorHandler({
-  dumpExceptions: true,
-  showStack: true
-}));
+  return app.use(express.errorHandler({
+    dumpExceptions: true,
+    showStack: true
+  }));
 });
 
 app.configure('production', function() {
-return app.use(express.errorHandler());
+  return app.use(express.errorHandler());
 });
 
 // Models
-var models_path = __dirname + '/app/models'
+var models_path = __dirname + '/app/models';
 var model_files = fs.readdirSync(models_path)
 model_files.forEach(function(file){
   require(models_path+'/'+file)
-})
+});
 
 // Controllers
 controllers_path = __dirname + '/app/controllers';
 controller_files = fs.readdirSync(controllers_path);
 
 controller_files.forEach(function(file) {
-return require(controllers_path + '/' + file)(app);
+  return require(controllers_path + '/' + file)(app);
 });
 
 app.listen(3000);

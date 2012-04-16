@@ -9,5 +9,6 @@
     , "coffee-script": ">= 0.0.1"
     , "yaml-config": ">= 0.1.0"
     , "mongoose": ">= 2.5.0"
+    , "faye": ">= 0.0.1"
   }
 }

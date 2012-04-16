@@ -81,7 +81,7 @@ module.exports = function(app) {
 
     board.save(function(err, doc) {
       if (err) {
-        utils.mongooseErrorHandler(err, req)
+        mongooseErrorHandler(err, req);
         res.render('boards/edit', {
           title: 'Edit board'
           , board: board
@@ -92,6 +92,10 @@ module.exports = function(app) {
         res.redirect('/board/'+board._id)
       }
     })
-  })
+  });
 };
+
+
+
+
 
