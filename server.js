@@ -20,6 +20,9 @@ faye = require('faye');
 ws = new faye.NodeAdapter({mount: '/faye', timeout: 45});
 ws.attach(app);
 
+io = require('socket.io').listen(app);
+
+
 
 app.configure(function() {
   app.set('views', __dirname + '/app/views');

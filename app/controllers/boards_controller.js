@@ -95,7 +95,12 @@ module.exports = function(app) {
   });
 };
 
-
+io.sockets.on('connection', function (socket) {
+  socket.on('update', function (data) {
+    console.log("From client: " + data);
+    socket.broadcast.emit("update",data);
+  });
+});
 
 
 

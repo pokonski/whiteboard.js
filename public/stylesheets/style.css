@@ -19,4 +19,6 @@ body{
   -webkit-background-size:20px 20px; /* override value for shitty webkit */
 
   background-position:0 0, 50px 0, 50px -50px, 0px 50px;
+  width: 938px;
+  height: 600px;
 }

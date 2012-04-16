@@ -1,9 +1,13 @@
 link(rel='stylesheet', href='/stylesheets/style.css')
 script(src="/javascripts/raphael.js")
+script(src="/socket.io/socket.io.js")
 
 h2= board.name
 
-
+.btn-toolbar
+  .btn-group
+    span#add-circle.btn Circle
+    span.btn Rectangle
 #whiteboard("data-id"=board._id)
 
 script(src="/javascripts/whiteboard.js")
