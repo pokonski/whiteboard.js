@@ -1,5 +1,6 @@
 link(rel='stylesheet', href='/stylesheets/style.css')
 script(src="/javascripts/raphael.js")
+script(src="/javascripts/raphael-serialize.js")
 script(src="/socket.io/socket.io.js")
 
 h2= board.name
@@ -7,7 +8,7 @@ h2= board.name
 .btn-toolbar
   .btn-group
     a#add-circle.btn Circle
-    a.btn Rectangle
+    a#add-rect.btn Rectangle
 
 #whiteboard.checkered("data-id"=board._id)
 script(src="/javascripts/whiteboard.js")

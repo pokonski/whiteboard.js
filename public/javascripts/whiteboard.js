@@ -1,4 +1,4 @@
-var paper, move, startMove,stopMove, channelName, createShape, createCircle, shapes, loadShapes, removeShape;
+var paper, move, startMove,stopMove, channelName, createShape, createCircle, createRect, shapes, loadShapes, removeShape;
 
 loadShapes = function(shapes){
   for (var shape in shapes){
@@ -16,10 +16,13 @@ createShape = function (paper, record){
   console.log(record);
   if (record.data.type == "circle"){
     shape = createCircle(paper, record.data);
+  } else if (record.data.type == "rect"){
+    shape = createRect(paper, record.data);
   }
   shape.data("_id", record._id);
   shape.attr("fill", "#5289DD");
   shape.attr("stroke", "#332F29");
+  shape.transform(record.data.transform);
   shape.drag(move,startMove,stopMove).attr({cursor: "move"});
   shape.dblclick(removeShape);
   shapes.push(shape);
@@ -27,6 +30,10 @@ createShape = function (paper, record){
 
 createCircle = function(paper, data){
   return paper.circle(data.cx,data.cy,data.r);
+};
+
+createRect = function(paper, data){
+  return paper.rect(data.x,data.y,data.width, data.height);
 };
 
 shapes = [];
@@ -63,10 +70,18 @@ paper = Raphael("whiteboard", 938, 600);
 var hover = function(){
   this.animate({fill: "#22ff33"},200);
 };
+var ox = 0;
+var oy = 0;
+
 move = function (dx, dy) {
-  var att = this.type == "rect" ? {x: this.ox + dx, y: this.oy + dy} : {cx: this.ox + dx, cy: this.oy + dy};
-  this.attr(att);
-  socket.emit('move', {board: channelName, type: this.type, cx: this.attr('cx'), cy: this.attr('cy'), shape_id: this.id});
+  var att;
+  this.attr({
+    transform: "...T" + (dx - ox) + "," + (dy - oy)
+  });
+  //socket.emit('move', $.extend({board: channelName, type: this.type, shape_id: this.id},att));
+
+  ox = dx;
+  oy = dy;
 };
 
 startMove = function () {
@@ -75,13 +90,31 @@ startMove = function () {
 };
 
 stopMove = function () {
-  socket.emit('update', {type: 'change', board: channelName, _id: this.data("_id"), data: {type: this.type, r: this.attr("r"), cx: this.attr('cx'), cy: this.attr('cy')}, shape_id: this.id});
+
+  //this.transform("...R45");
+  socket.emit('update',
+  //console.log(
+    {
+      type: 'change',
+      board: channelName,
+      _id: this.data("_id"),
+      data: serializeShape(this),
+      shape_id: this.id
+    }
+  );
+
+
+  ox = 0;
+  oy = 0;
 };
 
 /* INIT */
 
 $('#add-circle').click(function (){
   socket.emit("update",{type: 'create', board: channelName, data: {type: 'circle', cx: 50, cy: 50, r: 15}});
+});
+$('#add-rect').click(function (){
+  socket.emit("update",{type: 'create', board: channelName, data: {type: 'rect', x: 50, y: 50, width: 200, height: 70}});
 });
 
 //createCircle(paper, 370, 300,20);
