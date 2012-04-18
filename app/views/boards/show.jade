@@ -6,8 +6,16 @@ h2= board.name
 
 .btn-toolbar
   .btn-group
-    span#add-circle.btn Circle
-    span.btn Rectangle
-#whiteboard("data-id"=board._id)
+    a#add-circle.btn Circle
+    a.btn Rectangle
 
+#whiteboard.checkered("data-id"=board._id)
 script(src="/javascripts/whiteboard.js")
+
+
+
+
+script(type="text/javascript")
+  $(function(){
+    loadShapes(!{JSON.stringify(board.shapes)});
+  });

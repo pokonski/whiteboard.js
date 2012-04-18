@@ -1,3 +1,11 @@
+var ShapeSchema = new Schema({
+  data:{
+    type: Schema.Types.Mixed
+  }
+});
+
+conn.model('Shape', ShapeSchema);
+
 var BoardSchema = new Schema({
   name: {
     "type": String,
@@ -7,7 +15,8 @@ var BoardSchema = new Schema({
   "updated_at": {
     "type": Date,
     "required": true
-  }
+  },
+  "shapes": [ShapeSchema]
 });
 
 conn.model('Board', BoardSchema);

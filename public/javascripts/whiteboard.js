@@ -1,21 +1,59 @@
-var paper, move, startMove,stopMove, channelName, createCircle, shapes;
+var paper, move, startMove,stopMove, channelName, createShape, createCircle, shapes, loadShapes, removeShape;
+
+loadShapes = function(shapes){
+  for (var shape in shapes){
+    shape = shapes[shape];
+    createShape(paper,shape);
+  }
+};
+
+removeShape = function(){
+  socket.emit('update', {type: 'remove', board: channelName, _id: this.data("_id"), shape_id: this.id});
+};
+
+createShape = function (paper, record){
+  var shape;
+  console.log(record);
+  if (record.data.type == "circle"){
+    shape = createCircle(paper, record.data);
+  }
+  shape.data("_id", record._id);
+  shape.attr("fill", "#5289DD");
+  shape.attr("stroke", "#332F29");
+  shape.drag(move,startMove,stopMove).attr({cursor: "move"});
+  shape.dblclick(removeShape);
+  shapes.push(shape);
+};
+
+createCircle = function(paper, data){
+  return paper.circle(data.cx,data.cy,data.r);
+};
 
 shapes = [];
 // WebSockets
-channelName = "whiteboard_" + $('#whiteboard').data('id');
+channelName = $('#whiteboard').data('id');
 
-var socket = io.connect('http://localhost:3000');
+var socket = io.connect('http://okonski.dyndns.org:3000');
+
+socket.on('move', function (data) {
+  var shape = paper.getById(data.shape_id);
+  var att = data.type == "rect" ? {x: data.x, y: data.y} : {cx: data.cx, cy: data.cy};
+
+  if (shape)
+    shape.attr(att);
+});
 
 socket.on('update', function (data) {
   if (data.board !== channelName)
     return;
   if (data.type === "change"){
-    var att = this.type == "rect" ? {x: data.x, y: data.y} : {cx: data.x, cy: data.y};
-    var shape = paper.getById(data.id);
+    var shape = paper.getById(data.shape_id);
     if (shape)
-      shape.attr(att);
+      shape.animate(data.data,100);
   } else if (data.type === "create") {
-    createCircle(paper, data.x,data.y,data.radius, true);
+    createShape(paper, data);
+  } else if (data.type === "remove") {
+    paper.getById(data.shape_id).remove();
   }
 });
 
@@ -28,7 +66,7 @@ var hover = function(){
 move = function (dx, dy) {
   var att = this.type == "rect" ? {x: this.ox + dx, y: this.oy + dy} : {cx: this.ox + dx, cy: this.oy + dy};
   this.attr(att);
-  socket.emit('update', {type: 'change', board: channelName, x: att.cx, y: att.cy, id: this.id});
+  socket.emit('move', {board: channelName, type: this.type, cx: this.attr('cx'), cy: this.attr('cy'), shape_id: this.id});
 };
 
 startMove = function () {
@@ -37,27 +75,13 @@ startMove = function () {
 };
 
 stopMove = function () {
-
+  socket.emit('update', {type: 'change', board: channelName, _id: this.data("_id"), data: {type: this.type, r: this.attr("r"), cx: this.attr('cx'), cy: this.attr('cy')}, shape_id: this.id});
 };
 
 /* INIT */
 
-createCircle = function(paper, x,y,r, skipEmit){
-  var circle = paper.circle(x,y,r);
-  circle.attr("fill", "#f00");
-
-// Sets the stroke attribute of the circle to white
-  circle.attr("stroke", "#000000");
-  circle.drag(move,startMove,stopMove).attr({cursor: "move"});
-
-  shapes.push(circle);
-  if (typeof skipEmit === "undefined" || skipEmit === false)
-    socket.emit("update",{type: 'create', board: channelName, x: x, y: y, radius: r});
-};
-
 $('#add-circle').click(function (){
-  console.log("asd");
-  createCircle(paper, 50,50,15);
+  socket.emit("update",{type: 'create', board: channelName, data: {type: 'circle', cx: 50, cy: 50, r: 15}});
 });
 
-createCircle(paper, 370, 300,20, true);
+//createCircle(paper, 370, 300,20);

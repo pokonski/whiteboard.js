@@ -1,4 +1,5 @@
 var Board = conn.model('Board');
+var Shape = conn.model('Shape');
 
 module.exports = function(app) {
   app.get('/', function(req, res) {
@@ -97,8 +98,42 @@ module.exports = function(app) {
 
 io.sockets.on('connection', function (socket) {
   socket.on('update', function (data) {
-    console.log("From client: " + data);
-    socket.broadcast.emit("update",data);
+    console.log("From client: " + JSON.stringify(data));
+    // Create new shape
+    if (data.type === "create"){
+      Board.findById(data.board,function (err, board){
+        var shape = new Shape();
+        shape.data = data.data;
+        board.shapes.push(shape);
+        data._id = shape._id;
+        board.save();
+
+        socket.emit("update",data);
+        socket.broadcast.emit("update",data);
+      });
+    } else if (data.type == "change"){  // Move or change shape
+      Board.findById(data.board,function (err, board){
+        var shape = board.shapes.id(data._id);
+        if (!shape)
+          return;
+        shape.data = data.data;
+        board.save();
+        socket.emit("update",data);
+        socket.broadcast.emit("update",data);
+      });
+    } else if (data.type == "remove"){  // Remove shape
+      Board.findById(data.board,function (err, board){
+        board.shapes.id(data._id).remove();
+        board.save(function (err) {
+          socket.emit("update",data);
+          socket.broadcast.emit("update",data);
+        });
+      });
+    }
+  });
+  // Real-time movement
+  socket.on('move', function (data) {
+    socket.broadcast.emit("move",data);
   });
 });
 
