@@ -1,4 +1,7 @@
-var paper, move, startMove,stopMove, channelName, createShape, createCircle, createRect, shapes, loadShapes, removeShape;
+var paper, move, startMove,stopMove, channelName, createShape, createCircle, createRect, shapes,
+  loadShapes, removeShape, boundingRect, selectShape, selectedShape, deselectShape;
+boundingRect = null;
+selectedShape = null;
 
 loadShapes = function(shapes){
   for (var shape in shapes){
@@ -7,24 +10,45 @@ loadShapes = function(shapes){
   }
 };
 
+selectShape = function(shape){
+  var bb = shape.getBBox(false);
+  console.log(boundingRect);
+  if (boundingRect != null)
+    boundingRect.remove();
+  boundingRect = paper.rect(bb.x,bb.y,bb.width,bb.height);
+  boundingRect.attr({stroke: "#f00", "stroke-width": 2, "stroke-dasharray": "-"});
+  boundingRect.toFront();
+  selectedShape = shape;
+  $('#remove-shape').removeAttr('disabled');
+};
+
+deselectShape = function (){
+  boundingRect.remove();
+  boundingRect = null;
+  selectedShape = null;
+  $('#remove-shape').attr('disabled',true);
+};
 removeShape = function(){
-  socket.emit('update', {type: 'remove', board: channelName, _id: this.data("_id"), shape_id: this.id});
+  if (selectedShape == null)
+    return;
+  socket.emit('update', {type: 'remove', board: channelName, _id: selectedShape.data("_id"), shape_id: selectedShape.id});
+  $('#remove-shape').attr('disabled',true);
 };
 
 createShape = function (paper, record){
   var shape;
-  console.log(record);
   if (record.data.type == "circle"){
     shape = createCircle(paper, record.data);
   } else if (record.data.type == "rect"){
     shape = createRect(paper, record.data);
   }
   shape.data("_id", record._id);
-  shape.attr("fill", "#5289DD");
-  shape.attr("stroke", "#332F29");
+  shape.attr("fill", record.data.fill);
+  shape.attr("stroke", record.data.stroke);
   shape.transform(record.data.transform);
   shape.drag(move,startMove,stopMove).attr({cursor: "move"});
-  shape.dblclick(removeShape);
+  shape.click(function(){ selectShape(this) });
+  //shape.dblclick(removeShape);
   shapes.push(shape);
 };
 
@@ -44,10 +68,9 @@ var socket = io.connect('http://okonski.dyndns.org:3000');
 
 socket.on('move', function (data) {
   var shape = paper.getById(data.shape_id);
-  var att = data.type == "rect" ? {x: data.x, y: data.y} : {cx: data.cx, cy: data.cy};
 
   if (shape)
-    shape.attr(att);
+    shape.attr(data.data);
 });
 
 socket.on('update', function (data) {
@@ -55,12 +78,14 @@ socket.on('update', function (data) {
     return;
   if (data.type === "change"){
     var shape = paper.getById(data.shape_id);
-    if (shape)
-      shape.animate(data.data,100);
+    if (!shape)
+      return;
+    shape.animate(data.data,100);
   } else if (data.type === "create") {
     createShape(paper, data);
   } else if (data.type === "remove") {
     paper.getById(data.shape_id).remove();
+    deselectShape();
   }
 });
 
@@ -78,22 +103,24 @@ move = function (dx, dy) {
   this.attr({
     transform: "...T" + (dx - ox) + "," + (dy - oy)
   });
-  //socket.emit('move', $.extend({board: channelName, type: this.type, shape_id: this.id},att));
-
+  socket.emit('move', $.extend({board: channelName, type: this.type, data: {transform: serializeShape(this).transform}, shape_id: this.id},att));
+  if (boundingRect != null){
+    boundingRect.attr({
+      transform: "...T" + (dx - ox) + "," + (dy - oy)
+    });
+  }
   ox = dx;
   oy = dy;
 };
 
 startMove = function () {
+  selectShape(this);
   this.ox = this.type == "rect" ? this.attr("x") : this.attr("cx");
   this.oy = this.type == "rect" ? this.attr("y") : this.attr("cy");
 };
 
 stopMove = function () {
-
-  //this.transform("...R45");
   socket.emit('update',
-  //console.log(
     {
       type: 'change',
       board: channelName,
@@ -111,10 +138,31 @@ stopMove = function () {
 /* INIT */
 
 $('#add-circle').click(function (){
-  socket.emit("update",{type: 'create', board: channelName, data: {type: 'circle', cx: 50, cy: 50, r: 15}});
+  socket.emit("update",{type: 'create', board: channelName, data: {type: 'circle', cx: 50, cy: 50, r: 15, fill: "#f00"}});
 });
 $('#add-rect').click(function (){
-  socket.emit("update",{type: 'create', board: channelName, data: {type: 'rect', x: 50, y: 50, width: 200, height: 70}});
+  socket.emit("update",{type: 'create', board: channelName, data: {type: 'rect', x: 50, y: 50, width: 200, height: 70, fill: "#f00"}});
+});
+$('#remove-shape').click(function (){
+  removeShape();
+});
+$('#whiteboard > svg').click(function (e){
+  if (e.target.nodeName == "svg")
+    deselectShape();
 });
 
+$('select#color').change(function(){
+  if (selectedShape != null){
+    selectedShape.attr('fill',$(this).val());
+    socket.emit('update',
+      {
+        type: 'change',
+        board: channelName,
+        _id: selectedShape.data("_id"),
+        data: serializeShape(selectedShape),
+        shape_id: selectedShape.id
+      }
+    );
+  }
+});
 //createCircle(paper, 370, 300,20);

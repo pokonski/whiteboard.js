@@ -9,7 +9,15 @@ h2= board.name
   .btn-group
     a#add-circle.btn Circle
     a#add-rect.btn Rectangle
-
+  .btn-group.pull-right
+    a#remove-shape.btn.btn-danger(disabled="disabled")
+      i.icon-trash
+      | &nbsp;
+      | Remove
+select#color
+  option(value="#FF0000") Red
+  option(value="#00FF00") Green
+  option(value="#0000FF") Blue
 #whiteboard.checkered("data-id"=board._id)
 script(src="/javascripts/whiteboard.js")
 

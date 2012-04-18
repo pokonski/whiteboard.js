@@ -1,6 +1,5 @@
 var serializeShape = function(node) {
   var object = null;
-  console.log(node.type);
   if (node && node.type) {
     switch(node.type) {
       case "image":
