@@ -28,7 +28,6 @@ selectShape = function(shape){
   boundingRect.toFront();
   selectedShape = shape;
 
-  console.log("mongo id  " + shape.id + " : " + shape.data("_id"));
   $('#remove-shape').removeAttr('disabled');
   $('#color').val(shape.attr('fill'));
 };
@@ -54,7 +53,6 @@ createShape = function (paper, record){
   } else if (record.data.type == "rect"){
     shape = createRect(paper, record.data);
   }
-  console.log(shape.id);
   shape.data("_id", record._id);
   shape.attr("fill", record.data.fill);
   shape.attr("stroke", record.data.stroke);
@@ -90,7 +88,6 @@ socket.on('update', function (data) {
   if (data.board !== channelName)
     return;
   if (data.type === "change"){
-    console.log("move " + data.shape_id);
     var shape = findShape(paper,data._id);
     if (!shape)
       return;
