@@ -1,7 +1,16 @@
 var paper, move, startMove,stopMove, channelName, createShape, createCircle, createRect, shapes,
-  loadShapes, removeShape, boundingRect, selectShape, selectedShape, deselectShape;
+  loadShapes, removeShape, boundingRect, selectShape, selectedShape, deselectShape, findShape;
 boundingRect = null;
 selectedShape = null;
+
+findShape = function (paper,_id){
+  for(var node = paper.bottom; node != null; node = node.next) {
+    if (node && node.type && node.data("_id") === _id) {
+      return node;
+    }
+  }
+  return null;
+};
 
 loadShapes = function(shapes){
   for (var shape in shapes){
@@ -12,13 +21,14 @@ loadShapes = function(shapes){
 
 selectShape = function(shape){
   var bb = shape.getBBox(false);
-  console.log(boundingRect);
   if (boundingRect != null)
     boundingRect.remove();
   boundingRect = paper.rect(bb.x,bb.y,bb.width,bb.height);
   boundingRect.attr({stroke: "#f00", "stroke-width": 2, "stroke-dasharray": "-"});
   boundingRect.toFront();
   selectedShape = shape;
+
+  console.log("mongo id  " + shape.id + " : " + shape.data("_id"));
   $('#remove-shape').removeAttr('disabled');
   $('#color').val(shape.attr('fill'));
 };
@@ -44,6 +54,7 @@ createShape = function (paper, record){
   } else if (record.data.type == "rect"){
     shape = createRect(paper, record.data);
   }
+  console.log(shape.id);
   shape.data("_id", record._id);
   shape.attr("fill", record.data.fill);
   shape.attr("stroke", record.data.stroke);
@@ -79,7 +90,8 @@ socket.on('update', function (data) {
   if (data.board !== channelName)
     return;
   if (data.type === "change"){
-    var shape = paper.getById(data.shape_id);
+    console.log("move " + data.shape_id);
+    var shape = findShape(paper,data._id);
     if (!shape)
       return;
     shape.animate(data.data,100);
@@ -105,7 +117,7 @@ move = function (dx, dy) {
   this.attr({
     transform: "...T" + (dx - ox) + "," + (dy - oy)
   });
-  socket.emit('move', $.extend({board: channelName, type: this.type, data: {transform: serializeShape(this).transform}, shape_id: this.id},att));
+  //socket.emit('move', $.extend({board: channelName, type: this.type, data: {transform: serializeShape(this).transform}, shape_id: this.id},att));
   if (boundingRect != null){
     boundingRect.attr({
       transform: "...T" + (dx - ox) + "," + (dy - oy)
