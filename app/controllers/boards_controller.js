@@ -118,7 +118,7 @@ io.sockets.on('connection', function (socket) {
           return;
         shape.data = data.data;
         board.save();
-        socket.emit("update",data);
+        //socket.emit("update",data);
         socket.broadcast.emit("update",data);
       });
     } else if (data.type == "remove"){  // Remove shape
@@ -131,6 +131,7 @@ io.sockets.on('connection', function (socket) {
       });
     }
   });
+
   // Real-time movement
   socket.on('move', function (data) {
     socket.broadcast.emit("move",data);

@@ -20,10 +20,12 @@ selectShape = function(shape){
   boundingRect.toFront();
   selectedShape = shape;
   $('#remove-shape').removeAttr('disabled');
+  $('#color').val(shape.attr('fill'));
 };
 
 deselectShape = function (){
-  boundingRect.remove();
+  if (boundingRect != null)
+    boundingRect.remove();
   boundingRect = null;
   selectedShape = null;
   $('#remove-shape').attr('disabled',true);
@@ -151,9 +153,9 @@ $('#whiteboard > svg').click(function (e){
     deselectShape();
 });
 
-$('select#color').change(function(){
+$('#color').colorpicker().on('changeColor', function(e){
   if (selectedShape != null){
-    selectedShape.attr('fill',$(this).val());
+    selectedShape.attr('fill', e.color.toHex());
     socket.emit('update',
       {
         type: 'change',
@@ -165,4 +167,5 @@ $('select#color').change(function(){
     );
   }
 });
+
 //createCircle(paper, 370, 300,20);
