@@ -43,7 +43,7 @@ deselectShape = function (){
 removeShape = function(){
   if (selectedShape == null)
     return;
-  socket.emit('update', {type: 'remove', board: channelName, _id: selectedShape.data("_id"), shape_id: selectedShape.id});
+  socket.emit('update', {type: 'remove', board: channelName, _id: selectedShape.data("_id")});
   $('#remove-shape').attr('disabled',true);
 };
 
@@ -98,7 +98,9 @@ socket.on('update', function (data) {
   } else if (data.type === "create") {
     createShape(paper, data);
   } else if (data.type === "remove") {
-    paper.getById(data.shape_id).remove();
+    var shape = findShape(paper,data._id);
+    if (shape)
+      shape.remove();
     deselectShape();
   }
 });
