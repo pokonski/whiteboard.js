@@ -136,6 +136,13 @@ io.sockets.on('connection', function (socket) {
   socket.on('move', function (data) {
     socket.broadcast.emit("move",data);
   });
+
+  // Lock objects from being moved by more than 1 client
+  socket.on('lock', function (data) {
+    console.log("lock from client: " + JSON.stringify(data));
+
+    socket.broadcast.emit("lock",data);
+  });
 });
 
 
