@@ -1,13 +1,16 @@
 var Board = conn.model('Board');
 var Shape = conn.model('Shape');
 
-module.exports = function(app) {
-  app.get('/', function(req, res) {
+module.exports = function (app) {
+  "use strict";
+  app.get('/', function (req, res) {
     Board
       .find({})
       .sort("updated_at", -1)
-      .run(function(err, boards) {
-        if (err) throw err
+      .run(function (err, boards) {
+        if (err) {
+          throw err;
+        }
         res.render('boards/index', {
           title: 'List of boards',
           boards: boards
