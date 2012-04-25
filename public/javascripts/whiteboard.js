@@ -232,4 +232,9 @@ var loadShapes;
       });
     }
   });
+
+  // Unlock selected shape before quitting the page
+  $(window).bind("beforeunload", function () {
+    deselectShape();
+  });
 }(window.jQuery));
