@@ -1,10 +1,11 @@
 /* global io: false, serializeShape: false, Raphael: false */
 /* jslint nomen: true, devel: true, browser: true */
+var loadShapes;
 (function ($) {
   "use strict";
 
   var paper, move, startMove, stopMove, channelName, createShape, createCircle, createRect, shapes,
-    loadShapes, removeShape, boundingRect, selectShape, selectedShape, deselectShape, findShape,
+    removeShape, boundingRect, selectShape, selectedShape, deselectShape, findShape,
     socket, hover, ox, oy;
 
   boundingRect = null;
