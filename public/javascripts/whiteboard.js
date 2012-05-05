@@ -6,13 +6,10 @@ var loadShapes;
 
   var paper, move, startMove, stopMove, channelName, createShape, createCircle, createRect, shapes,
     removeShape, boundingRect, selectShape, selectedShape, deselectShape, findShape,
-    socket, hover, ox, oy;
+    socket;
 
   boundingRect = null;
   selectedShape = null;
-
-  ox = 0;
-  oy = 0;
 
   shapes = [];
 
@@ -42,17 +39,18 @@ var loadShapes;
   };
 
   selectShape = function (shape) {
-    if (shape.data("locked") === true) {
+    if (shape.data("locked") === true || selectedShape === shape) {
       return;
     }
-    var bb = shape.getBBox(false);
-    if (boundingRect !== null) {
-      boundingRect.remove();
+    //var bb = shape.getBBox(false);
+    if (selectedShape !== null) {
+      //boundingRect.remove();
+      shapes[selectedShape.data("_id")].ft.hideHandles();
       socket.emit("lock", {type: "unset", _id: selectedShape.data("_id")});
     }
-    boundingRect = paper.rect(bb.x, bb.y, bb.width, bb.height);
-    boundingRect.attr({stroke: "#f00", "stroke-width": 2, "stroke-dasharray": "-"});
-    boundingRect.toFront();
+    //boundingRect = paper.rect(bb.x, bb.y, bb.width, bb.height);
+    //boundingRect.attr({stroke: "#f00", "stroke-width": 2, "stroke-dasharray": "-"});
+    //boundingRect.toFront();
     selectedShape = shape;
 
     $('#remove-shape').removeAttr('disabled');
@@ -63,10 +61,13 @@ var loadShapes;
   deselectShape = function () {
     socket.emit("lock", {type: "unset", _id: selectedShape.data("_id")});
 
-    if (boundingRect !== null) {
+    /* if (boundingRect !== null) {
       boundingRect.remove();
     }
-    boundingRect = null;
+    boundingRect = null; */
+    if (selectedShape) {
+      shapes[selectedShape.data("_id")].ft.hideHandles();
+    }
     selectedShape = null;
     $('#remove-shape').attr('disabled', true);
 
@@ -80,7 +81,7 @@ var loadShapes;
   };
 
   createShape = function (paper, record) {
-    var shape;
+    var shape, ft;
     if (record.data.type === "circle") {
       shape = createCircle(paper, record.data);
     } else if (record.data.type === "rect") {
@@ -91,12 +92,33 @@ var loadShapes;
     shape.attr("fill", record.data.fill);
     shape.attr("stroke", record.data.stroke);
     shape.transform(record.data.transform);
-    shape.drag(move, startMove, stopMove).attr({cursor: "move"});
+    //shape.drag(move, startMove, stopMove).attr({cursor: "move"});
+    shape.click(function () {
+      if (this.data("locked") !== true) {
+        shapes[this.data("_id")].ft.showHandles();
+      }
+    });
     shape.click(function () {
       selectShape(this);
     });
-    //shape.dblclick(removeShape);
-    shapes.push(shape);
+    ft = paper.freeTransform(shape, {showBBox: true, attrs: { cursor: "pointer", fill: "#FFF", stroke: "#000" }}, function (ft, events) {
+
+      if (events.join(" ").match(/start/)) {
+        selectShape(ft.subject);
+      }
+      if (events.indexOf("rotate end") !== -1 || events.indexOf("scale end") !== -1 || events.indexOf("drag end") !== -1) {
+
+        socket.emit('update', {
+          type: 'change',
+          board: channelName,
+          _id: ft.subject.data("_id"),
+          data: serializeShape(ft.subject),
+          shape_id: ft.subject.id
+        });
+      }
+    });
+    ft.hideHandles();
+    shapes[record._id] = {shape: shape, ft: ft};
   };
 
   createCircle = function (paper, data) {
@@ -136,17 +158,22 @@ var loadShapes;
     }
     var shape;
     if (data.type === "change") {
-      shape = findShape(paper, data._id);
+      shape = shapes[data._id].shape;
       if (!shape) {
         return;
       }
-      shape.animate(data.data, 100);
+      shape.animate(data.data, 100, "ease-out", function () {
+        //shapes[data._id].ft;
+        console.log("anim finished");
+      });
     } else if (data.type === "create") {
       createShape(paper, data);
     } else if (data.type === "remove") {
-      shape = findShape(paper, data._id);
+      shape = shapes[data._id].shape;
       if (shape) {
         shape.remove();
+        shapes[data._id].ft.unplug();
+        delete shapes[data._id];
       }
       deselectShape();
     }
@@ -155,53 +182,7 @@ var loadShapes;
 
   paper = Raphael("whiteboard", 938, 600);
 
-  hover = function () {
-    this.animate({fill: "#22ff33"}, 200);
-  };
 
-
-  move = function (dx, dy) {
-    if (this.data("locked") === true) {
-      return;
-    }
-    this.attr({
-      transform: "...T" + (dx - ox) + "," + (dy - oy)
-    });
-    //socket.emit('move', $.extend({board: channelName, type: this.type, _id: this.data("_id"), data: {transform: serializeShape(this).transform}},att));
-    if (boundingRect !== null) {
-      boundingRect.attr({
-        transform: "...T" + (dx - ox) + "," + (dy - oy)
-      });
-    }
-    ox = dx;
-    oy = dy;
-  };
-
-  startMove = function () {
-    if (this.data("locked") === true) {
-      return;
-    }
-    selectShape(this);
-    this.ox = this.type === "rect" ? this.attr("x") : this.attr("cx");
-    this.oy = this.type === "rect" ? this.attr("y") : this.attr("cy");
-  };
-
-  stopMove = function () {
-    if (this.data("locked") === true) {
-      return;
-    }
-    socket.emit('update', {
-      type: 'change',
-      board: channelName,
-      _id: this.data("_id"),
-      data: serializeShape(this),
-      shape_id: this.id
-    });
-
-
-    ox = 0;
-    oy = 0;
-  };
 
   /* EVENTS */
 
