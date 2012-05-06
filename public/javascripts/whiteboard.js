@@ -6,7 +6,7 @@ var loadShapes;
 
   var paper, move, startMove, stopMove, channelName, createShape, createCircle, createRect, shapes,
     removeShape, boundingRect, selectShape, selectedShape, deselectShape, findShape,
-    socket, attachFreeTransform;
+    socket, attachFreeTransform, emitUpdate;
 
   boundingRect = null;
   selectedShape = null;
@@ -38,6 +38,16 @@ var loadShapes;
     }
   };
 
+  emitUpdate = function (shape) {
+    socket.emit('update', {
+      type: 'change',
+      board: channelName,
+      _id: shape.data("_id"),
+      data: serializeShape(shape, shapes[shape.data("_id")].ft.attrs),
+      shape_id: shape.id
+    });
+  };
+
   selectShape = function (shape) {
     if (shape.data("locked") === true || selectedShape === shape) {
       return;
@@ -54,6 +64,7 @@ var loadShapes;
 
     $('#remove-shape').removeAttr('disabled');
     $('#color').val(shape.attr('fill'));
+    $('#stroke-width').val(shape.attr('stroke-width'));
     socket.emit("lock", {type: "set", _id: shape.data("_id")});
   };
 
@@ -102,6 +113,8 @@ var loadShapes;
       shape = createCircle(paper, record.data);
     } else if (record.data.type === "rect") {
       shape = createRect(paper, record.data);
+    } else if (record.data.type === "text") {
+      shape = paper.text(record.data.x, record.data.y, record.data.text);
     }
     shape.data("_id", record._id);
     shape.data("locked", false);
@@ -197,6 +210,12 @@ var loadShapes;
   $('#add-rect').click(function () {
     socket.emit("update", {type: 'create', board: channelName, data: {type: 'rect', x: 50, y: 50, width: 200, height: 70, fill: "#f00"}});
   });
+  $('#add-text').click(function () {
+    var text = prompt("Enter text");
+    if (text.length > 0) {
+      socket.emit("update", {type: 'create', board: channelName, data: {type: 'text', x: 50, y: 50, text: text, fill: "#f00"}});
+    }
+  });
   $('#remove-shape').click(function () {
     removeShape();
   });
@@ -206,16 +225,16 @@ var loadShapes;
     }
   });
 
-  $('#color').colorpicker().on('changeColor', function (e) {
+  $('#colorBox').colorpicker().on('changeColor', function (e) {
     if (selectedShape !== null) {
       selectedShape.attr('fill', e.color.toHex());
-      socket.emit('update', {
-        type: 'change',
-        board: channelName,
-        _id: selectedShape.data("_id"),
-        data: serializeShape(selectedShape, shapes[selectedShape.data("_id")].ft.attrs),
-        shape_id: selectedShape.id
-      });
+      emitUpdate(selectedShape);
+    }
+  });
+  $('#stroke-width').on('change', function (){
+    if (selectedShape !== null) {
+      selectedShape.attr('stroke-width', $(this).val());
+      emitUpdate(selectedShape);
     }
   });
 
