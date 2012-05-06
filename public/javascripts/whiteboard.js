@@ -6,7 +6,7 @@ var loadShapes;
 
   var paper, move, startMove, stopMove, channelName, createShape, createCircle, createRect, shapes,
     removeShape, boundingRect, selectShape, selectedShape, deselectShape, findShape,
-    socket;
+    socket, attachFreeTransform;
 
   boundingRect = null;
   selectedShape = null;
@@ -42,16 +42,15 @@ var loadShapes;
     if (shape.data("locked") === true || selectedShape === shape) {
       return;
     }
-    //var bb = shape.getBBox(false);
-    if (selectedShape !== null) {
+
+    if (selectedShape) {
       //boundingRect.remove();
       shapes[selectedShape.data("_id")].ft.hideHandles();
       socket.emit("lock", {type: "unset", _id: selectedShape.data("_id")});
     }
-    //boundingRect = paper.rect(bb.x, bb.y, bb.width, bb.height);
-    //boundingRect.attr({stroke: "#f00", "stroke-width": 2, "stroke-dasharray": "-"});
-    //boundingRect.toFront();
+
     selectedShape = shape;
+    console.log(shapes[shape.data("_id")].ft.attrs);
 
     $('#remove-shape').removeAttr('disabled');
     $('#color').val(shape.attr('fill'));
@@ -59,13 +58,8 @@ var loadShapes;
   };
 
   deselectShape = function () {
-    socket.emit("lock", {type: "unset", _id: selectedShape.data("_id")});
-
-    /* if (boundingRect !== null) {
-      boundingRect.remove();
-    }
-    boundingRect = null; */
     if (selectedShape) {
+      socket.emit("lock", {type: "unset", _id: selectedShape.data("_id")});
       shapes[selectedShape.data("_id")].ft.hideHandles();
     }
     selectedShape = null;
@@ -79,7 +73,29 @@ var loadShapes;
     socket.emit('update', {type: 'remove', board: channelName, _id: selectedShape.data("_id")});
     $('#remove-shape').attr('disabled', true);
   };
+  attachFreeTransform = function (shape) {
+    if (shapes[shape.data("_id")]) {
+      shapes[shape.data("_id")].ft.unplug();
+    }
+    var ft = paper.freeTransform(shape, {showBBox: true, attrs: { cursor: "pointer", fill: "#FFF", stroke: "#000" }}, function (ft, events) {
 
+      if (events.join(" ").match(/start/)) {
+        selectShape(ft.subject);
+      }
+      if (events.indexOf("rotate end") !== -1 || events.indexOf("scale end") !== -1 || events.indexOf("drag end") !== -1) {
+
+        socket.emit('update', {
+          type: 'change',
+          board: channelName,
+          _id: ft.subject.data("_id"),
+          data: serializeShape(ft.subject, ft.attrs),
+          shape_id: ft.subject.id
+        });
+      }
+    });
+    ft.hideHandles();
+    return ft;
+  };
   createShape = function (paper, record) {
     var shape, ft;
     if (record.data.type === "circle") {
@@ -96,28 +112,14 @@ var loadShapes;
     shape.click(function () {
       if (this.data("locked") !== true) {
         shapes[this.data("_id")].ft.showHandles();
+        selectShape(this);
       }
     });
-    shape.click(function () {
-      selectShape(this);
-    });
-    ft = paper.freeTransform(shape, {showBBox: true, attrs: { cursor: "pointer", fill: "#FFF", stroke: "#000" }}, function (ft, events) {
-
-      if (events.join(" ").match(/start/)) {
-        selectShape(ft.subject);
-      }
-      if (events.indexOf("rotate end") !== -1 || events.indexOf("scale end") !== -1 || events.indexOf("drag end") !== -1) {
-
-        socket.emit('update', {
-          type: 'change',
-          board: channelName,
-          _id: ft.subject.data("_id"),
-          data: serializeShape(ft.subject),
-          shape_id: ft.subject.id
-        });
-      }
-    });
-    ft.hideHandles();
+    ft = attachFreeTransform(shape);
+    if (record.data.attrs) {
+      ft.attrs = record.data.attrs;
+      ft.apply();
+    }
     shapes[record._id] = {shape: shape, ft: ft};
   };
 
@@ -163,8 +165,11 @@ var loadShapes;
         return;
       }
       shape.animate(data.data, 100, "ease-out", function () {
-        //shapes[data._id].ft;
-        console.log("anim finished");
+        if (data.data.ft) {
+          var ft = shapes[data._id].ft;
+          ft.attrs = data.data.ft;
+          ft.apply();
+        }
       });
     } else if (data.type === "create") {
       createShape(paper, data);
@@ -208,7 +213,7 @@ var loadShapes;
         type: 'change',
         board: channelName,
         _id: selectedShape.data("_id"),
-        data: serializeShape(selectedShape),
+        data: serializeShape(selectedShape, shapes[selectedShape.data("_id")].ft.attrs),
         shape_id: selectedShape.id
       });
     }

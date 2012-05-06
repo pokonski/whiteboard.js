@@ -1,4 +1,4 @@
-var serializeShape = function(node) {
+var serializeShape = function(node, freeTransform) {
   var object = null;
   if (node && node.type) {
     switch(node.type) {
@@ -101,5 +101,8 @@ var serializeShape = function(node) {
     }
   }
   object.transform = node.transform();
+  if (freeTransform) {
+    object.ft = freeTransform;
+  }
   return object;
 };
