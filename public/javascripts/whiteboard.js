@@ -261,7 +261,11 @@ var loadShapes;
       emitUpdate(selectedShape);
     }
   });
-
+  $(document).keydown(function (e) {
+    if (e.which === 46) {
+      removeShape();
+    }
+  });
   // Unlock selected shape before quitting the page
   $(window).bind("beforeunload", function () {
     deselectShape();
