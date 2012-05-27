@@ -61,7 +61,6 @@ var loadShapes;
     }
 
     selectedShape = shape;
-    console.log(shapes[shape.data("_id")].ft.attrs);
 
     $('#remove-shape').removeAttr('disabled');
     $('#fill-color').data('color', shape.attr('fill')).colorpicker('update');
@@ -124,6 +123,7 @@ var loadShapes;
     shape.data("locked", false);
     shape.attr("fill", record.data.fill);
     shape.attr("stroke", record.data.stroke);
+    shape.attr("stroke-width", record.data["stroke-width"]);
     //shape.attr("vector-effect", "non-scaling-stroke");
     shape.transform(record.data.transform);
     //shape.drag(move, startMove, stopMove).attr({cursor: "move"});
