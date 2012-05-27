@@ -165,9 +165,14 @@ var loadShapes;
         shape.data("locked", false).attr({cursor: "move"}).attr("opacity", 1);
       }
     }
-
   });
 
+  // Update lock status when new user connects
+  socket.on('status', function (data) {
+    if (data.type === "locks" && selectedShape) {
+      socket.emit("lock", {type: "set", _id: selectedShape.data("_id")});
+    }
+  });
   socket.on('update', function (data) {
     if (data.board !== channelName) {
       return;

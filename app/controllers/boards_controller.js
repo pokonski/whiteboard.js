@@ -97,6 +97,8 @@ module.exports = function (app) {
 };
 
 io.sockets.on('connection', function (socket) {
+  "use strict";
+  socket.broadcast.emit("status", {type: "locks"});
   socket.on('update', function (data) {
     console.log("From client: " + JSON.stringify(data));
     // Create new shape
