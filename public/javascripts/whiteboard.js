@@ -120,6 +120,7 @@ var loadShapes;
     shape.data("locked", false);
     shape.attr("fill", record.data.fill);
     shape.attr("stroke", record.data.stroke);
+    //shape.attr("vector-effect", "non-scaling-stroke");
     shape.transform(record.data.transform);
     //shape.drag(move, startMove, stopMove).attr({cursor: "move"});
     shape.click(function () {
@@ -231,7 +232,7 @@ var loadShapes;
       emitUpdate(selectedShape);
     }
   });
-  $('#stroke-width').on('change', function (){
+  $('#stroke-width').on('change', function () {
     if (selectedShape !== null) {
       selectedShape.attr('stroke-width', $(this).val());
       emitUpdate(selectedShape);
