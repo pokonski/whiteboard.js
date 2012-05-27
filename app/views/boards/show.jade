@@ -10,6 +10,7 @@ h2= board.name
 
 .btn-toolbar
   .btn-group
+    a.btn(disabled) Shapes
     a#add-circle.btn Circle
     a#add-rect.btn Rectangle
     a#add-text.btn Text
@@ -17,8 +18,13 @@ h2= board.name
     a#remove-shape.btn.btn-danger(disabled="disabled")
       i.icon-trash
 form.form-inline
-  div#colorBox.input-prepend.input-append.color(data-color="#FFFFFF",data-color-format="hex")
+  div#fill-color.input-prepend.input-append.color(data-color="#FFFFFF",data-color-format="hex")
     span.add-on Fill
+    input(type="text")#color.span2
+    span.add-on
+      i(style="background-color: #FFF")
+  div#stroke-color.input-prepend.input-append.color(data-color="#FFFFFF",data-color-format="hex")
+    span.add-on Stroke
     input(type="text")#color.span2
     span.add-on
       i(style="background-color: #FFF")

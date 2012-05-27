@@ -54,8 +54,9 @@ var loadShapes;
     }
 
     if (selectedShape) {
-      //boundingRect.remove();
-      shapes[selectedShape.data("_id")].ft.hideHandles();
+      if (shapes[selectedShape.data("_id")]) {
+        shapes[selectedShape.data("_id")].ft.hideHandles();
+      }
       socket.emit("lock", {type: "unset", _id: selectedShape.data("_id")});
     }
 
@@ -63,7 +64,8 @@ var loadShapes;
     console.log(shapes[shape.data("_id")].ft.attrs);
 
     $('#remove-shape').removeAttr('disabled');
-    $('#color').val(shape.attr('fill'));
+    $('#fill-color').data('color', shape.attr('fill')).colorpicker('update');
+    $('#stroke-color').data('color', shape.attr('stroke')).colorpicker('update');
     $('#stroke-width').val(shape.attr('stroke-width'));
     socket.emit("lock", {type: "set", _id: shape.data("_id")});
   };
@@ -71,7 +73,9 @@ var loadShapes;
   deselectShape = function () {
     if (selectedShape) {
       socket.emit("lock", {type: "unset", _id: selectedShape.data("_id")});
-      shapes[selectedShape.data("_id")].ft.hideHandles();
+      if (shapes[selectedShape.data("_id")]) {
+        shapes[selectedShape.data("_id")].ft.hideHandles();
+      }
     }
     selectedShape = null;
     $('#remove-shape').attr('disabled', true);
@@ -231,12 +235,13 @@ var loadShapes;
     }
   });
 
-  $('#colorBox').colorpicker().on('changeColor', function (e) {
+  $('#stroke-color, #fill-color').colorpicker().on('changeColor', function (e) {
     if (selectedShape !== null) {
-      selectedShape.attr('fill', e.color.toHex());
+      selectedShape.attr(($(this).attr('id') === "stroke-color" ? "stroke" : "fill"), e.color.toHex());
       emitUpdate(selectedShape);
     }
   });
+
   $('#stroke-width').on('change', function () {
     if (selectedShape !== null) {
       selectedShape.attr('stroke-width', $(this).val());
