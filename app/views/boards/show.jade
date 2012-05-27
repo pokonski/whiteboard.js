@@ -14,10 +14,7 @@ h2= board.name
     a#add-circle.btn ○
     a#add-rect.btn ▭
     a#add-text.btn Abc
-  .btn-group.pull-right
-    a#remove-shape.btn.btn-danger(disabled="disabled")
-      i.icon-trash
-  form.form-inline.pull-right.clearfix
+  form#shape-settings.form-inline.pull-right(style="opacity: 0")
     div#fill-color.input-prepend.input-append.color(data-color="#FFFFFF",data-color-format="hex")
       span.add-on Fill
       input(type="text")#color.span2
@@ -42,6 +39,8 @@ h2= board.name
         option(value="8") 8px
         option(value="9") 9px
         option(value="10") 10px
+    a#remove-shape.btn.btn-danger(disabled="disabled")
+      i.icon-trash
 
 #whiteboard.checkered("data-id"=board._id)
 script(src="/javascripts/whiteboard.js")

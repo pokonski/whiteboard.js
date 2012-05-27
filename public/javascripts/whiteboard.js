@@ -61,8 +61,7 @@ var loadShapes;
     }
 
     selectedShape = shape;
-
-    $('#remove-shape').removeAttr('disabled');
+    $('#shape-settings').css('opacity', 1);
     $('#fill-color').data('color', shape.attr('fill')).colorpicker('update');
     $('#stroke-color').data('color', shape.attr('stroke')).colorpicker('update');
     $('#stroke-width').val(shape.attr('stroke-width'));
@@ -77,7 +76,7 @@ var loadShapes;
       }
     }
     selectedShape = null;
-    $('#remove-shape').attr('disabled', true);
+    $('#shape-settings').css('opacity', 0);
 
   };
   removeShape = function () {
