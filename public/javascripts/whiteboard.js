@@ -91,7 +91,7 @@ var loadShapes;
     if (shapes[shape.data("_id")]) {
       shapes[shape.data("_id")].ft.unplug();
     }
-    var ft = paper.freeTransform(shape, {showBBox: true, attrs: { cursor: "pointer", fill: "#FFF", stroke: "#000" }}, function (ft, events) {
+    var ft = paper.freeTransform(shape, {showAxisHandles: true, dragSnap: 5, dragScale: true, rotateSnapDist: 15, showBBox: true, attrs: { cursor: "pointer", fill: "#FFF", stroke: "#000" }}, function (ft, events) {
 
       if (events.join(" ").match(/start/)) {
         selectShape(ft.subject);
