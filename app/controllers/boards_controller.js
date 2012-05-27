@@ -29,9 +29,13 @@ module.exports = function (app) {
 
   // Show
   app.get('/board/:id', function (req, res) {
-    res.render('boards/show', {
-      title: req.board.name,
-      board: req.board
+    fs.readdir('./public/shapes/',function(err,files){
+      if(err) throw err;
+      res.render('boards/show', {
+        title: req.board.name,
+        board: req.board,
+        svgs: files
+      });
     });
   });
 
@@ -101,10 +105,13 @@ io.sockets.on('connection', function (socket) {
   socket.broadcast.emit("status", {type: "locks"});
   socket.on('update', function (data) {
     console.log("From client: " + JSON.stringify(data));
-    // Create new shape
-    if (data.type === "create") {
-      Board.findById(data.board, function (err, board) {
-        var shape = new Shape();
+    Board.findById(data.board, function (err, board) {
+      if (err){
+        return;
+      }
+      var shape;
+      if (data.type === "create") {
+        shape = new Shape();
         shape.data = data.data;
         board.shapes.push(shape);
         data._id = shape._id;
@@ -112,10 +119,8 @@ io.sockets.on('connection', function (socket) {
 
         socket.emit("update", data);
         socket.broadcast.emit("update", data);
-      });
-    } else if (data.type === "change") {  // Move or change shape
-      Board.findById(data.board, function (err, board) {
-        var shape = board.shapes.id(data._id);
+      } else if (data.type === "change") {
+        shape = board.shapes.id(data._id);
         if (!shape) {
           return;
         }
@@ -123,16 +128,14 @@ io.sockets.on('connection', function (socket) {
         board.save();
         //socket.emit("update",data);
         socket.broadcast.emit("update", data);
-      });
-    } else if (data.type === "remove") {  // Remove shape
-      Board.findById(data.board, function (err, board) {
+      } else if (data.type === "remove") {
         board.shapes.id(data._id).remove();
         board.save(function (err) {
           socket.emit("update", data);
           socket.broadcast.emit("update", data);
         });
-      });
-    }
+      }
+    });
   });
 
   // Real-time movement

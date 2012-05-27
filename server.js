@@ -1,5 +1,5 @@
 var app, config, config_file, controller_files,
-  controllers_path, exports, express, routes, fs, faye, flash_messages;
+  controllers_path, exports, express, routes, faye, flash_messages;
 
 fs = require('fs');
 express = require('express');

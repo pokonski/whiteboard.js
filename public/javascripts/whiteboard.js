@@ -84,13 +84,12 @@ var loadShapes;
       return;
     }
     socket.emit('update', {type: 'remove', board: channelName, _id: selectedShape.data("_id")});
-    $('#remove-shape').attr('disabled', true);
   };
   attachFreeTransform = function (shape) {
     if (shapes[shape.data("_id")]) {
       shapes[shape.data("_id")].ft.unplug();
     }
-    var ft = paper.freeTransform(shape, {showAxisHandles: true, dragSnap: 5, dragScale: true, rotateSnapDist: 15, showBBox: true, attrs: { cursor: "pointer", fill: "#FFF", stroke: "#000" }}, function (ft, events) {
+    var ft = paper.freeTransform(shape, {showAxisHandles: true, showBBox: true, attrs: { cursor: "pointer", fill: "#FFF", stroke: "#000" }}, function (ft, events) {
 
       if (events.join(" ").match(/start/)) {
         selectShape(ft.subject);
@@ -117,6 +116,8 @@ var loadShapes;
       shape = createRect(paper, record.data);
     } else if (record.data.type === "text") {
       shape = paper.text(record.data.x, record.data.y, record.data.text);
+    } else if (record.data.type === "path") {
+      shape = paper.path(record.data.path);
     }
     shape.data("_id", record._id);
     shape.data("locked", false);
@@ -224,6 +225,19 @@ var loadShapes;
     if (text.length > 0) {
       socket.emit("update", {type: 'create', board: channelName, data: {type: 'text', x: 50, y: 50, text: text, fill: "#f00"}});
     }
+  });
+
+  $('.add-svg').click(function () {
+    $.ajax({
+      type: "GET",
+      url: "/shapes/" + $(this).data("shape"),
+      dataType: "xml",
+      success: function (svgXML) {
+        var el = paper.importSVG(svgXML)[0];
+        socket.emit("update", {type: 'create', board: channelName, data: {type: 'path', path: el.attr("path"), fill: "#000000"}});
+        el.remove();
+      }
+    });
   });
   $('#remove-shape').click(function () {
     removeShape();

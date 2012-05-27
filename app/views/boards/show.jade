@@ -3,47 +3,53 @@ link(rel='stylesheet', href='/stylesheets/colorpicker.css')
 script(src="/javascripts/libs/raphael.js")
 script(src="/javascripts/libs/raphael-serialize.js")
 script(src="/javascripts/libs/raphael-freeTransform.js")
+script(src="/javascripts/libs/raphael-svg-import.js")
 script(src="/javascripts/libs/bootstrap-colorpicker.js")
 script(src="/socket.io/socket.io.js")
+#header
+  .container
+    h2
+      a(href = '/') &larr;
+      = board.name
 
-h2= board.name
-
-.btn-toolbar
-  .btn-group.shapes
-    a.btn(disabled) Shapes
-    a#add-circle.btn ○
-    a#add-rect.btn ▭
-    a#add-text.btn Abc
-  form#shape-settings.form-inline.pull-right(style="opacity: 0")
-    div#fill-color.input-prepend.input-append.color(data-color="#FFFFFF",data-color-format="hex")
-      span.add-on Fill
-      input(type="text")#color.span2
-      span.add-on
-        i(style="background-color: #FFF")
-    div#stroke-color.input-prepend.input-append.color(data-color="#FFFFFF",data-color-format="hex")
-      span.add-on Stroke
-      input(type="text")#color.span2
-      span.add-on
-        i(style="background-color: #FFF")
-    div.input-prepend
-      span.add-on Stroke
-      select#stroke-width.span1
-        option(value="0") 0px
-        option(value="1") 1px
-        option(value="2") 2px
-        option(value="3") 3px
-        option(value="4") 4px
-        option(value="5") 5px
-        option(value="6") 6px
-        option(value="7") 7px
-        option(value="8") 8px
-        option(value="9") 9px
-        option(value="10") 10px
-    a#remove-shape.btn.btn-danger(disabled="disabled")
-      i.icon-trash
-
-#whiteboard.checkered("data-id"=board._id)
-script(src="/javascripts/whiteboard.js")
+    .btn-toolbar
+      .btn-group.shapes
+        a.btn(disabled) Shapes
+        a#add-circle.btn ○
+        a#add-rect.btn ▭
+        a#add-text.btn Abc
+        - for shape in svgs
+          a.add-svg.btn(data-shape=shape,style="background-image: url(/shapes/#{shape})") &nbsp;
+      form#shape-settings.form-inline.pull-right(style="opacity: 0")
+        div#fill-color.input-prepend.input-append.color(data-color="#FFFFFF",data-color-format="hex")
+          span.add-on Fill
+          input(type="text")#color.span2
+          span.add-on
+            i(style="background-color: #FFF")
+        div#stroke-color.input-prepend.input-append.color(data-color="#FFFFFF",data-color-format="hex")
+          span.add-on Stroke
+          input(type="text")#color.span2
+          span.add-on
+            i(style="background-color: #FFF")
+        div.input-prepend
+          span.add-on Stroke
+          select#stroke-width.span1
+            option(value="0") 0px
+            option(value="1") 1px
+            option(value="2") 2px
+            option(value="3") 3px
+            option(value="4") 4px
+            option(value="5") 5px
+            option(value="6") 6px
+            option(value="7") 7px
+            option(value="8") 8px
+            option(value="9") 9px
+            option(value="10") 10px
+        a#remove-shape.btn.btn-danger
+          i.icon-trash
+.container
+  #whiteboard.checkered("data-id"=board._id)
+  script(src="/javascripts/whiteboard.js")
 
 
 
