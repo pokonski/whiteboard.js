@@ -17,31 +17,32 @@ h2= board.name
   .btn-group.pull-right
     a#remove-shape.btn.btn-danger(disabled="disabled")
       i.icon-trash
-form.form-inline
-  div#fill-color.input-prepend.input-append.color(data-color="#FFFFFF",data-color-format="hex")
-    span.add-on Fill
-    input(type="text")#color.span2
-    span.add-on
-      i(style="background-color: #FFF")
-  div#stroke-color.input-prepend.input-append.color(data-color="#FFFFFF",data-color-format="hex")
-    span.add-on Stroke
-    input(type="text")#color.span2
-    span.add-on
-      i(style="background-color: #FFF")
-  div.input-prepend
-    span.add-on Stroke
-    select#stroke-width.span2
-      option(value="0") 0px
-      option(value="1") 1px
-      option(value="2") 2px
-      option(value="3") 3px
-      option(value="4") 4px
-      option(value="5") 5px
-      option(value="6") 6px
-      option(value="7") 7px
-      option(value="8") 8px
-      option(value="9") 9px
-      option(value="10") 10px
+  form.form-inline.pull-right.clearfix
+    div#fill-color.input-prepend.input-append.color(data-color="#FFFFFF",data-color-format="hex")
+      span.add-on Fill
+      input(type="text")#color.span2
+      span.add-on
+        i(style="background-color: #FFF")
+    div#stroke-color.input-prepend.input-append.color(data-color="#FFFFFF",data-color-format="hex")
+      span.add-on Stroke
+      input(type="text")#color.span2
+      span.add-on
+        i(style="background-color: #FFF")
+    div.input-prepend
+      span.add-on Stroke
+      select#stroke-width.span1
+        option(value="0") 0px
+        option(value="1") 1px
+        option(value="2") 2px
+        option(value="3") 3px
+        option(value="4") 4px
+        option(value="5") 5px
+        option(value="6") 6px
+        option(value="7") 7px
+        option(value="8") 8px
+        option(value="9") 9px
+        option(value="10") 10px
+
 #whiteboard.checkered("data-id"=board._id)
 script(src="/javascripts/whiteboard.js")
 
