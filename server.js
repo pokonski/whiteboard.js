@@ -1,5 +1,5 @@
 var app, config, config_file, controller_files,
-  controllers_path, exports, express, routes, faye, flash_messages;
+  controllers_path, exports, express, routes, flash_messages;
 
 fs = require('fs');
 express = require('express');
@@ -23,10 +23,6 @@ flash_messages = function (req, res, next) {
 app = express.createServer();
 
 // WebSockets
-faye = require('faye');
-ws = new faye.NodeAdapter({mount: '/faye', timeout: 45});
-ws.attach(app);
-
 io = require('socket.io').listen(app);
 
 
