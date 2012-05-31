@@ -16,7 +16,7 @@ var loadShapes;
   // WebSockets
   channelName = $('#whiteboard').data('id');
 
-  socket = io.connect('http://okonski.dyndns.org:3000');
+  socket = io.connect(':3000');
 
   findShape = function (paper, _id) {
     var node;

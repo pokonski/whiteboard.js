@@ -29,7 +29,7 @@ module.exports = function (app) {
 
   // Show
   app.get('/board/:id', function (req, res) {
-    fs.readdir('./public/shapes/',function(err,files){
+    fs.readdir('./public/shapes/', function (err, files) {
       if(err) throw err;
       res.render('boards/show', {
         title: req.board.name,
@@ -106,11 +106,13 @@ io.sockets.on('connection', function (socket) {
   socket.on('update', function (data) {
     console.log("From client: " + JSON.stringify(data));
     Board.findById(data.board, function (err, board) {
-      if (err){
+      if (err) {
+        console.log(err);
         return;
       }
       var shape;
       if (data.type === "create") {
+        console.log("create");
         shape = new Shape();
         shape.data = data.data;
         board.shapes.push(shape);
@@ -146,7 +148,6 @@ io.sockets.on('connection', function (socket) {
   // Lock objects from being moved by more than 1 client
   socket.on('lock', function (data) {
     console.log("lock from client: " + JSON.stringify(data));
-
     socket.broadcast.emit("lock", data);
   });
 });
