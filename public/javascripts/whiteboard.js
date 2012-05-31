@@ -68,8 +68,11 @@ var loadShapes;
     socket.emit("lock", {type: "set", _id: shape.data("_id")});
   };
 
-  deselectShape = function () {
+  deselectShape = function (target) {
     if (selectedShape) {
+      if (target && selectedShape.data("_id") !== target) {
+        return;
+      }
       socket.emit("lock", {type: "unset", _id: selectedShape.data("_id")});
       if (shapes[selectedShape.data("_id")]) {
         shapes[selectedShape.data("_id")].ft.hideHandles();
@@ -203,7 +206,7 @@ var loadShapes;
         shapes[data._id].ft.unplug();
         delete shapes[data._id];
       }
-      deselectShape();
+      deselectShape(data._id);
     }
   });
 
