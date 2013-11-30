@@ -8,7 +8,7 @@
     , "jade": ">= 0.0.1"
     , "coffee-script": ">= 0.0.1"
     , "yaml-config": ">= 0.1.0"
-    , "mongoose": ">= 2.5.0"
+    , "mongoose": "2.5.0"
     , "socket.io": ">= 0.0.1"
   }
 }
